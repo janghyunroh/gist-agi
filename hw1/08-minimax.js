@@ -1,5 +1,5 @@
 
-// Exper AI 재구성 해보기
+// 
 
 // Available variables:
 
@@ -8,89 +8,11 @@
 // getValidMoves(player): returns array of valid moves for player
 
 
-// Easy 난이도 : 무작위 수
-
-function makeEasyAIMove(validMoves) {
-    const randomIndex = Math.floor(Math.random() * validMoves.length);
-    return validMoves[randomIndex];
-}
-
-// Medium 난이도: 
-function makeMediumAIMove(validMoves) {
-    // Check for corner moves
-    for (const move of validMoves) {
-        if ((move.row === 0 || move.row === 7) && (move.col === 0 || move.col === 7)) {
-            return move;
-        }
-    }
-    
-    // Check for edge moves
-    const edgeMoves = validMoves.filter(move => 
-        move.row === 0 || move.row === 7 || move.col === 0 || move.col === 7
-    );
-    
-    if (edgeMoves.length > 0) {
-        const randomIndex = Math.floor(Math.random() * edgeMoves.length);
-        return edgeMoves[randomIndex];
-    }
-    
-    // Otherwise, choose a random move
-    return makeEasyAIMove(validMoves);
-}
-
-// Hard AI: Use a simple evaluation function
-function makeHardAIMove(validMoves) {
-    let bestScore = -Infinity;
-    let bestMove = null;
-    
-    // Weights for different positions
-    const weights = [
-        [100, -20, 10, 5, 5, 10, -20, 100],
-        [-20, -50, -2, -2, -2, -2, -50, -20],
-        [10, -2, -1, -1, -1, -1, -2, 10],
-        [5, -2, -1, -1, -1, -1, -2, 5],
-        [5, -2, -1, -1, -1, -1, -2, 5],
-        [10, -2, -1, -1, -1, -1, -2, 10],
-        [-20, -50, -2, -2, -2, -2, -50, -20],
-        [100, -20, 10, 5, 5, 10, -20, 100]
-    ];
-    
-    for (const move of validMoves) {
-        // Create a copy of the board
-        const boardCopy = board.map(row => [...row]);
-        
-        // Simulate the move
-        makeMove(move.row, move.col, WHITE);
-        
-        // Calculate score based on position weights
-        let score = 0;
-        for (let row = 0; row < BOARD_SIZE; row++) {
-            for (let col = 0; col < BOARD_SIZE; col++) {
-                if (board[row][col] === WHITE) {
-                    score += weights[row][col];
-                } else if (board[row][col] === BLACK) {
-                    score -= weights[row][col];
-                }
-            }
-        }
-        
-        // If this move is better, remember it
-        if (score > bestScore) {
-            bestScore = score;
-            bestMove = move;
-        }
-        
-        // Restore the board
-        board = boardCopy;
-    }
-    
-    return bestMove || makeEasyAIMove(validMoves);
-}
 
 
 function makeExpertAIMove(validMoves) {
     // Minimax algorithm implementation (depth 6)
-    const MAX_DEPTH = 8;
+    const MAX_DEPTH = 6;
     let bestScore = -Infinity;
     let bestMove = null;
     
