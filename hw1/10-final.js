@@ -62,10 +62,13 @@ function simulateMove(bd, move, p) {
   bd[move.row][move.col] = p;
   var opp = 1 - p;
 
+  //뒤집을 수 있는 모든 방향의 상대 돌을 모두 뒤집기
   for (var i = 0; i < directions.length; i++) {
     var dr = directions[i][0], dc = directions[i][1];
     var r = move.row + dr, c = move.col + dc;
     var toFlip = [];
+
+    //
     while (r >= 0 && r < bd.length && c >= 0 && c < bd[0].length && bd[r][c] === opp) {
       toFlip.push({ row: r, col: c });
       r += dr;
@@ -82,7 +85,7 @@ function simulateMove(bd, move, p) {
   return bd;
 }
 
-// 5. 돌 개수 세기 함수
+// 5. 보드 전체에 대한 p의 돌 개수 세기 함수
 function countDiscs(bd, p) {
   var cnt = 0;
   for (var r = 0; r < bd.length; r++) {
