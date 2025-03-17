@@ -4,10 +4,25 @@
 // player: current player (1 for Black, 2 for White)
 // getValidMoves(player): returns array of valid moves for player
 
+// additional environmental variables
+
+// 1) 방향 매트릭스(돌 뒤집기에서 쓰임)
 const directions = [
   [-1, -1], [-1, 0], [-1, 1],
   [0, -1],           [0, 1],
   [1, -1],  [1, 0],  [1, 1]
+];
+
+// 2) 가중치 매트릭스(보드 평가에 사용)
+const positionWeights = [
+  [120, -20, 20,  5,  5, 20, -20, 120],
+  [-20, -40, -5, -5, -5, -5, -40, -20],
+  [ 20,  -5, 15,  3,  3, 15,  -5,  20],
+  [  5,  -5,  3,  3,  3,  3,  -5,   5],
+  [  5,  -5,  3,  3,  3,  3,  -5,   5],
+  [ 20,  -5, 15,  3,  3, 15,  -5,  20],
+  [-20, -40, -5, -5, -5, -5, -40, -20],
+  [120, -20, 20,  5,  5, 20, -20, 120]
 ];
 
 // 1. 보드 깊은 복사 함수
@@ -15,12 +30,7 @@ function cloneBoard(bd) {
   return bd.map(function(row) { return row.slice(); });
 }
   
-// 2. 상대 플레이어 반환 함수
-function opponent(p) {
-  return p === 1 ? 2 : 1;
-}
-  
-// 3. validmove 함수 직접 구현(시뮬레이션에서 쓰기 위함) - Expert 코드 분석후 가져 옴. 
+// 2. validmove 함수 직접 구현(시뮬레이션에서 쓰기 위함) - Expert 코드 분석후 가져 옴. 
 function computeValidMoves(bd, p) {
   var moves = [];
   
@@ -39,7 +49,7 @@ function computeValidMoves(bd, p) {
         var foundOpp = false;
 
         // 해당 방향으로 계속 이동하면서 상대 돌들을 모두 지나침!
-        while (r >= 0 && r < bd.length && c >= 0 && c < bd[0].length && bd[r][c] === 1 - p) { 
+        while (r >= 0 && r < bd.length && c >= 0 && c < bd[0].length && bd[r][c] === 3 - p) { 
           foundOpp = true;
           r += dr;
           c += dc;
@@ -57,10 +67,10 @@ function computeValidMoves(bd, p) {
   return moves;
 }
 
-// 4. 가상 착수 함수: 주어진 보드 복사본에 대해 move({row, col})를 p의 돌로 두고 돌 뒤집기
+// 3. 가상 착수 함수: 주어진 보드 복사본에 대해 move({row, col})를 p의 돌로 두고 돌 뒤집기
 function simulateMove(bd, move, p) {
   bd[move.row][move.col] = p;
-  var opp = 1 - p;
+  var opp = 3 - p;
 
   //뒤집을 수 있는 모든 방향의 상대 돌을 모두 뒤집기
   for (var i = 0; i < directions.length; i++) {
@@ -105,11 +115,6 @@ function countMobility(bd, p) {
 // 7. 프론티어 계산: 플레이어 p의 돌 중 주변에 빈 칸이 있는 돌의 수
 function countFrontier(bd, p) {
   var frontier = 0;
-  var directions = [
-    [-1, -1], [-1, 0], [-1, 1],
-    [0, -1],           [0, 1],
-    [1, -1],  [1, 0],  [1, 1]
-  ];
   for (var r = 0; r < bd.length; r++) {
     for (var c = 0; c < bd[0].length; c++) {
       if (bd[r][c] === p) {
@@ -127,22 +132,12 @@ function countFrontier(bd, p) {
   return frontier;
 }
 
-// 8. 위치 가중치 테이블 (전략적 가치 반영)
-const positionWeights = [
-  [120, -20, 20, 5, 5, 20, -20, 120],
-  [-20, -40, -5, -5, -5, -5, -40, -20],
-  [20, -5, 15, 3, 3, 15, -5, 20],
-  [5, -5, 3, 3, 3, 3, -5, 5],
-  [5, -5, 3, 3, 3, 3, -5, 5],
-  [20, -5, 15, 3, 3, 15, -5, 20],
-  [-20, -40, -5, -5, -5, -5, -40, -20],
-  [120, -20, 20, 5, 5, 20, -20, 120]
-];
+
 
 // 9. 평가 함수: 여러 요소(위치, 모빌리티, 프론티어, 돌 차이)를 고려하여 보드 평가 (플레이어 p 관점)
 // 모빌리티는 최종 보드 상태에서의 유효한 수 차이를 평가
 function evaluateBoard(bd, p) {
-  var opp = opponent(p);
+  var opp = 3 - p;
   
   // 위치 평가
   var posScore = 0;
@@ -195,12 +190,8 @@ function makeExpertAIMove(validMoves) {
   
   function isValidMoveForMinimax(bd, row, col, p) {
     if (bd[row][col] !== 0) return false;
-    var opp = opponent(p);
-    var directions = [
-      [-1, -1], [-1, 0], [-1, 1],
-      [0, -1],           [0, 1],
-      [1, -1],  [1, 0],  [1, 1]
-    ];
+    var opp = 3 - p;
+
     for (var i = 0; i < directions.length; i++) {
       var dr = directions[i][0], dc = directions[i][1];
       var r = row + dr, c = col + dc;
@@ -222,12 +213,8 @@ function makeExpertAIMove(validMoves) {
   
   function makeSimulatedMove(bd, move, p) {
     bd[move.row][move.col] = p;
-    var opp = opponent(p);
-    var directions = [
-      [-1, -1], [-1, 0], [-1, 1],
-      [0, -1],           [0, 1],
-      [1, -1],  [1, 0],  [1, 1]
-    ];
+    var opp = 3 - p;
+
     directions.forEach(function(dir) {
       var r = move.row + dir[0], c = move.col + dir[1];
       var toFlip = [];
@@ -301,7 +288,7 @@ function makeExpertAIMove(validMoves) {
     }
   }
   
-  return bestMove || makeHardAIMove(validMoves);
+  return bestMove;
 }
   
 // 최종적으로, 외부에서 유효한 수 배열을 미리 계산하여 Expert AI 전략을 호출합니다.
