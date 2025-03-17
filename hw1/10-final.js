@@ -1,7 +1,14 @@
 // --- Constants and Environment ---
+
 // board: 8x8 array (0=empty, 1=BLACK, 2=WHITE)
 // player: current player (1 for Black, 2 for White)
 // getValidMoves(player): returns array of valid moves for player
+
+const directions = [
+  [-1, -1], [-1, 0], [-1, 1],
+  [0, -1],           [0, 1],
+  [1, -1],  [1, 0],  [1, 1]
+];
 
 // 1. 보드 깊은 복사 함수
 function cloneBoard(bd) {
@@ -13,29 +20,34 @@ function opponent(p) {
   return p === 1 ? 2 : 1;
 }
   
-// 3. 유효 수 계산 함수 (오셀로 규칙 기반)
+// 3. validmove 함수 직접 구현(시뮬레이션에서 쓰기 위함) - Expert 코드 분석후 가져 옴. 
 function computeValidMoves(bd, p) {
   var moves = [];
-  var directions = [
-      [-1, -1], [-1, 0], [-1, 1],
-      [0, -1],           [0, 1],
-      [1, -1],  [1, 0],  [1, 1]
-  ];
+  
+  //보드의 각 칸에 대해 계산
   for (var row = 0; row < bd.length; row++) {
     for (var col = 0; col < bd[0].length; col++) {
-      if (bd[row][col] !== 0) continue; // 빈 칸이 아니면 패스
+
+      // 빈 칸이 아니면 패스
+      if (bd[row][col] !== 0) continue; 
+
+
       var valid = false;
-      for (var i = 0; i < directions.length; i++) {
+      for (var i = 0; i < directions.length; i++) { //해당 칸에서 해당 방향으로 1칸 
         var dr = directions[i][0], dc = directions[i][1];
         var r = row + dr, c = col + dc;
         var foundOpp = false;
-        while (r >= 0 && r < bd.length && c >= 0 && c < bd[0].length && bd[r][c] === opponent(p)) {
+
+        // 해당 방향으로 계속 이동하면서 상대 돌들을 모두 지나침!
+        while (r >= 0 && r < bd.length && c >= 0 && c < bd[0].length && bd[r][c] === 1 - p) { 
           foundOpp = true;
           r += dr;
           c += dc;
         }
+
+        // 모두 지나친 뒤에 거기에 내 돌이 있으면 둘 수 있음. 
         if (foundOpp && r >= 0 && r < bd.length && c >= 0 && c < bd[0].length && bd[r][c] === p) {
-          valid = true;
+          valid = true; //flag 설정. 
           break;
         }
       }
@@ -48,12 +60,8 @@ function computeValidMoves(bd, p) {
 // 4. 가상 착수 함수: 주어진 보드 복사본에 대해 move({row, col})를 p의 돌로 두고 돌 뒤집기
 function simulateMove(bd, move, p) {
   bd[move.row][move.col] = p;
-  var opp = opponent(p);
-  var directions = [
-    [-1, -1], [-1, 0], [-1, 1],
-    [0, -1],           [0, 1],
-    [1, -1],  [1, 0],  [1, 1]
-  ];
+  var opp = 1 - p;
+
   for (var i = 0; i < directions.length; i++) {
     var dr = directions[i][0], dc = directions[i][1];
     var r = move.row + dr, c = move.col + dc;
@@ -163,7 +171,7 @@ function stabilityBonus(move) {
   return 0;
 }
 
-// 11. Expert AI: minimax 알고리즘 (depth 8) 기반, 평가 함수에 모빌리티를 포함함
+// 11. Expert AI: minimax 알고리즘 (depth 6) 기반, 평가 함수에 모빌리티를 포함함
 function makeExpertAIMove(validMoves) {
   const MAX_DEPTH = 6;
   let bestScore = -Infinity;
