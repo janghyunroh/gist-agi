@@ -87,10 +87,9 @@ function makeHardAIMove(validMoves) {
     return bestMove || makeEasyAIMove(validMoves);
 }
 
-
 function makeExpertAIMove(validMoves) {
     // Minimax algorithm implementation (depth 6)
-    const MAX_DEPTH = 8;
+    const MAX_DEPTH = 6;
     let bestScore = -Infinity;
     let bestMove = null;
     
