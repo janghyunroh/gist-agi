@@ -26,20 +26,22 @@ if (validMoves.length === 0) return null;
 // making decision
 
 let maxPriority = -Infinity
-let validmove = null
+let validmove = []
 for(const move of validMoves){
     const positionPriority = proirities[move.row][move.col]
     if(positionPriority > maxPriority) {
         maxPriority = positionPriority
-        validmove = move
+        validmove.length = 0
+        validmove.push(move)
+    }
+    else if(positionPriority == maxPriority) {
+        validmove.push(move)
     }
 }
 
-return validmove;
+const randomIndex = Math.floor(Math.random() * validmove.length);
+return validmove[randomIndex];
 
 /**
- * 다 이김! 흑/백 상관없이 모든 AI를 이겼음. 
- * X와 C를 끝까지 기피하는 것만으로 이 정도 승률이 나옴. 
- * 자기 자신과 붙이면 백이 무조건 이김. 근데 이건 알고리즘이 결정적이라 그럴 수도 있는 거 같음. 
- * 동일 priority에 대해 랜덤으로 선택하는 옵션을 둬보자!
+ * 결과: 
  */

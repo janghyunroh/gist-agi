@@ -290,7 +290,7 @@ function cloneBoard(bd) {
       }
     }
     
-    return bestMove || makeHardAIMove(validMoves);
+    return bestMove;
   }
   
   // 최종적으로, 외부에서 유효한 수 배열을 미리 계산하여 Expert AI 전략을 호출합니다.

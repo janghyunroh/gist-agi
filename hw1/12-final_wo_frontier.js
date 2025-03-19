@@ -156,13 +156,10 @@ function evaluateBoard(bd, aiPlayer) {
     //moiblity score: (플레이어 착수 가능 수 개수) - (상대 착수 가능 수 개수)
     const mobilityScore = countMobility(bd, aiPlayer) - countMobility(bd, opp);
 
-    //frontier score: () - ()
-    const frontierScore = countFrontier(bd, opp) - countFrontier(bd, aiPlayer);
-
     //disc score: 
     const discScore = countDiscs(bd, aiPlayer) - countDiscs(bd, opp);
 
-    return W_POS * posScore + W_MOBILITY * mobilityScore + W_FRONTIER * frontierScore + W_DISC * discScore;
+    return W_POS * posScore + W_MOBILITY * mobilityScore + W_DISC * discScore;
 }
 
 /** makeMyStrategyMove: 최종 착수 함수

@@ -1,5 +1,5 @@
 
-// Exper AI 재구성 해보기
+// Expert AI 재구성 해보기
 
 // Available variables:
 
