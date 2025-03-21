@@ -120,8 +120,8 @@ function computeFrontierScore(bd, p) {
         if (nr >= 0 && nr < bd.length && nc >= 0 && nc < bd[0].length) {
           if (bd[nr][nc] === 0) { // 0은 EMPTY
 
-            if(bd[r][c] === p) frontier++; //내 돌인 경우
-            else if(bd[r][c] === 3 - p) frontier--; //상대 돌인 경우
+            if(bd[r][c] === p) frontier--; //내 돌인 경우
+            else if(bd[r][c] === 3 - p) frontier++; //상대 돌인 경우
 
             break;
           }
