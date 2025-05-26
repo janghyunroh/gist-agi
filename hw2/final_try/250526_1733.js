@@ -2,7 +2,7 @@
 // Intelligent System for Othello AI Arena with corrected PV indexing and full-time PV search
 
 const CONFIG = {
-    useMCTS: false,            // true to use MCTS instead of IDDFS+α–β
+    useMCTS: true,            // true to use MCTS instead of IDDFS+α–β
     initialDepth: 6,           // base depth to start PV search
     mctsIterations: 1000,      // iterations for MCTS if used
   };
