@@ -240,10 +240,95 @@ function alphaBeta(board, player, depth, alpha, beta, api, weights, tt, deadline
 }
 
 // --- MCTS ---
-class MCTSNode { constructor(b,p,m,pr){this.board=b;this.player=p;this.move=m;this.parent=pr;this.children=[];this.visits=0;this.wins=0;} isLeaf(){return!this.children.length;} }
-function mctsSearch(board, player, validMoves, api, weights, deadline){const root=new MCTSNode(board,player);while(performance.now()<deadline){let nd=treePolicy(root,api);const rw=defaultPolicy(nd,api,weights);backup(nd,rw);}let bm=null,mvC=-1;for(const c of root.children)if(c.visits>mvC){mvC=c.visits;bm=c;}return bm?bm.move:validMoves[0];}
-function treePolicy(node,api){while(true){const ms=api.getValidMoves(node.board,node.player);if(!ms.length)return node;if(node.isLeaf()){expand(node,ms,api);return node.children[0];}node=bestUCT(node);} }
-function expand(node,moves,api){for(const mv of moves){const r=api.simulateMove(node.board,node.player,mv.row,mv.col);if(!r.valid)continue;node.children.push(new MCTSNode(r.resultingBoard,3-node.player,mv,node));}}function bestUCT(node){const C=Math.sqrt(2);let bm=null,bv=-1;for(const c of node.children){const u=(c.wins/(c.visits+1))+C*Math.sqrt(Math.log(node.visits+1)/(c.visits+1));if(u>bv){bv=u;bm=c;}}return bm;}function defaultPolicy(node,api,weights){let b=node.board.map(r=>[...r]),p=node.player;for(let i=0;i<20;i++){const ms=api.getValidMoves(b,p);if(!ms.length)break;const mv=ms[Math.floor(Math.random()*ms.length)];const rr=api.simulateMove(b,p,mv.row,mv.col);b=rr.resultingBoard;p=3-p;}return api.evaluateBoard(b,node.player).totalScore;}function backup(node,rw){while(node){node.visits++;node.wins+=rw;node=node.parent;}}
+// defaultPolicy and backup must be defined before mctsSearch
+function defaultPolicy(node, api, weights) {
+  let b = node.board.map(r => [...r]);
+  let p = node.player;
+  for (let i = 0; i < 20; i++) {
+    const moves = api.getValidMoves(b, p);
+    if (!moves.length) break;
+    const mv = moves[Math.floor(Math.random() * moves.length)];
+    const res = api.simulateMove(b, p, mv.row, mv.col);
+    b = res.resultingBoard;
+    p = 3 - p;
+  }
+  const ev = api.evaluateBoard(b, node.player);
+  return ev.totalScore;
+}
+
+function backup(node, reward) {
+  while (node) {
+    node.visits++;
+    node.wins += reward;
+    node = node.parent;
+  }
+}
+
+class MCTSNode {
+  constructor(board, player, move = null, parent = null) {
+    this.board = board;
+    this.player = player;
+    this.move = move;
+    this.parent = parent;
+    this.children = [];
+    this.visits = 0;
+    this.wins = 0;
+  }
+  isLeaf() { return this.children.length === 0; }
+}
+
+function expand(node, moves, api) {
+  for (const mv of moves) {
+    const res = api.simulateMove(node.board, node.player, mv.row, mv.col);
+    if (!res.valid) continue;
+    node.children.push(new MCTSNode(res.resultingBoard, 3 - node.player, mv, node));
+  }
+}
+
+function bestUCT(node) {
+  const C = Math.sqrt(2);
+  let best = null;
+  let bestVal = -Infinity;
+  for (const c of node.children) {
+    const uct = (c.wins / (c.visits + 1)) +
+                C * Math.sqrt(Math.log(node.visits + 1) / (c.visits + 1));
+    if (uct > bestVal) {
+      bestVal = uct;
+      best = c;
+    }
+  }
+  return best;
+}
+
+function treePolicy(node, api) {
+  while (true) {
+    const moves = api.getValidMoves(node.board, node.player);
+    if (!moves.length) return node;
+    if (node.isLeaf()) {
+      expand(node, moves, api);
+      if (!node.children.length) return node;
+      return node.children[0];
+    }
+    const next = bestUCT(node);
+    if (!next) return node;
+    node = next;
+  }
+}
+
+function mctsSearch(board, player, validMoves, api, weights, deadline) {
+  const root = new MCTSNode(board, player);
+  while (performance.now() < deadline) {
+    let node = treePolicy(root, api);
+    const reward = defaultPolicy(node, api, weights);
+    backup(node, reward);
+  }
+  let best = null;
+  let maxVisits = -1;
+  for (const c of root.children) {
+    if (c.visits > maxVisits) { maxVisits = c.visits; best = c; }
+  }
+  return best ? best.move : validMoves[0];
+}
 
 // --- Utilities ---
 function staticEval(board,weights,player){let sc=0,op=3-player;for(let i=0;i<board.length;i++)for(let j=0;j<board.length;j++){if(board[i][j]===player)sc+=weights[i][j];else if(board[i][j]===op)sc-=weights[i][j];}return sc;}
