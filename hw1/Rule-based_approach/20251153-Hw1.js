@@ -166,7 +166,7 @@
   }
   
   // MyStrategy: minimax 알고리즘(알파-베타 가지치기) 기반 최적의 수 선택 함수
-  function makeMyStrategyMove(board, player) {
+  function studentStrategy(board, player) {
     const opp = 3 - player;
     const MAX_DEPTH = 6;
     let bestScore = -Infinity;
@@ -239,5 +239,5 @@
   }
   
   // 최종 호출
-  return makeMyStrategyMove(board, player);
+  return studentStrategy(board, player);
   
